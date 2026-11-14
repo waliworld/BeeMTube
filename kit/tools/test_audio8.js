@@ -313,6 +313,30 @@ async function main() {
         assert.strictEqual(r2.ok, false);
     });
 
+    await t('a slow call is never dispatched twice: a timeout is not retried under another shape', async () => {
+        freshCar();
+        const c = mk({ callMs: 300 });
+        // a proxy with two shapes: the member call hangs (reaches the car and never answers), and callMethod would
+        // also reach the car. The fix must call the car once, time out, and not fall through to the second shape.
+        let hits = 0;
+        const p = {
+            getAudioFocus: () => { hits++; return new Promise(() => {}); },         // dispatched, never answers
+            callMethod: () => { hits++; return Promise.resolve({ token: 'T', dynMediaPlayerError: 'OK' }); },
+        };
+        const r = await c.call(DYN, p, 'getAudioFocus', { clientId: 1 }, 300);
+        assert.strictEqual(r.ok, false, 'a timed-out call is a failure, not a success');
+        assert.strictEqual(hits, 1, 'the car was asked exactly once, not once per shape (hits=' + hits + ')');
+    });
+
+    await t('a wrong shape (member missing) does fall through to callMethod', async () => {
+        freshCar();
+        const c = mk();
+        let via = null;
+        const p = { callMethod: (m) => { via = 'callMethod'; return Promise.resolve({ dynMediaPlayerError: 'OK' }); } };
+        const r = await c.call(DYN, p, 'heartBeat', { token: 'T' }, 500);
+        assert.ok(r.ok && via === 'callMethod', 'a proxy with only callMethod is used: ' + JSON.stringify(r) + ' via ' + via);
+    });
+
     console.log(results.join('\n'));
     const bad = results.filter((r) => r.startsWith('FAIL'));
     console.log(bad.length ? 'audio8: ' + bad.length + ' FAILED' : 'audio8: all ok');

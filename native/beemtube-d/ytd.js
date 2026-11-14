@@ -1573,18 +1573,14 @@ Daemon.prototype.soundAttached = function (sink, at) {
  * picture must not stop with it. Our own clock takes over where it was and the search looks further. */
 Daemon.prototype.soundDropped = function (why) {
     if (!this.sinks || !this.ticking) return undefined;
-    const s = this.sinks.fellAway();
-    if (!s) return undefined;
-    this.log('sound: ' + s.name + ' stopped (' + why + '): the picture plays on');
     this.sawPlay = false;
     this.settle = null;
-    this.sinks.clock = new (require('./audio.js').ClockSink)(this.opts, this.sinks.h, (ms) => !this.paused && (this.fetchedMs === Infinity || ms + 1000 <= this.fetchedMs));
-    this.sinks.clock.play(this.audioFile(), this.elapsed, { durationMs: this.cur && this.cur.durationMs });
-    if (this.paused) this.sinks.clock.stopTicking();
+    // fellAway lets the sound go and restarts the picture's own clock (where the play is, paused if we are)
+    const s = this.sinks.fellAway(this.paused);
+    if (!s) return undefined;
+    this.log('sound: ' + s.name + ' stopped (' + why + '): the picture plays on');
     this.emit({ ev: 'note', msg: 'The sound stopped - the video plays on' });
     this.sendState();
-    this.sinks.cancelled = false;
-    this.sinks.search();
     return undefined;
 };
 /* The audio file as it is now: the whole one, else the head of it the fetcher wrote first. */

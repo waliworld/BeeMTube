@@ -189,19 +189,24 @@ CarAudio.prototype.call = async function (iface, p, m, args, ms) {
     if (p && typeof p.callMethod === 'function') ways.push({ how: 'p.callMethod(m, args, ms)', run: () => p.callMethod(m, args, ms) });
     if (p && typeof p.call === 'function') ways.push({ how: 'p.call(m, args, ms)', run: () => p.call(m, args, ms) });
     if (!ways.length) return { ok: false, error: 'the proxy offers no way to call ' + m };
-    // the way that worked before, first
+    // once the shape that answers for this interface is known, use only it: the method was dispatched, so a
+    // failure or a timeout is the car's answer, never a reason to send the same call again under another shape
     const known = this.how[iface];
-    ways.sort((x, y) => (x.how === known ? -1 : y.how === known ? 1 : 0));
+    const knownWay = known && ways.filter((w) => w.how === known)[0];
+    if (knownWay) return tryFor(knownWay.run, ms + 1500, m);
+    // the first time: try each shape, but fall through ONLY on a synchronous shape mismatch ("is not a
+    // function"). A timeout means the call reached the car, so it is not retried under another shape - that would
+    // dispatch a mutating call (getAudioFocus, createPlaylist) twice.
     let last = null;
     for (const w of ways) {
         const r = await tryFor(w.run, ms + 1500, m);
         if (r.ok) {
-            if (this.how[iface] !== w.how) { this.how[iface] = w.how; this.say('methods of ' + iface.split('.').pop() + ' are called as ' + w.how); }
+            this.how[iface] = w.how;
+            this.say('methods of ' + iface.split('.').pop() + ' are called as ' + w.how);
             return r;
         }
         last = r.error;
-        // a call that was made and refused by the car is an answer: do not try another shape
-        if (!/is not a function|undefined|did not answer/i.test(String(last))) return r;
+        if (!/is not a function|is not a function\)|undefined is not/i.test(String(last))) return r;
     }
     return { ok: false, error: last || 'no way to call ' + m };
 };

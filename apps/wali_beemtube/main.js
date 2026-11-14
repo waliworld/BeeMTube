@@ -128,7 +128,10 @@ mgu.run({
             } catch (e) { log.warn('car audio: not available: ' + ((e && e.message) || e)); }
         }
         ctl.on('up', () => { model.setConnected(true); changed(); service(); if (car) { try { car.hello(mgu.SPEC.version); } catch (e) { log.warn('car audio: ' + e); } } });
-        ctl.on('down', () => { model.setConnected(false); changed(); service(); });
+        // the service gone: nobody will ask us to give the car's audio back, so it is given back now
+        ctl.on('down', () => { model.setConnected(false); changed(); service(); if (car) { try { const r = car.release(); if (r && r.catch) r.catch(() => {}); } catch (e) { /* nothing left to do */ } } });
+        // the app manager stopping the app: the same, in the moment it leaves us
+        if (car && ctx.onShutdown) ctx.onShutdown(() => { try { const r = car.release(); if (r && r.catch) r.catch(() => {}); } catch (e) { /* going away */ } });
         service();
         ctl.on('msg', (m) => {
             // the service asking this app for the car's sound: answered by audio8.js, never by the model

@@ -689,6 +689,19 @@ async function runInner(impl) {
         onTab(fn) { display.onTab = fn; },
         /** onTap(fn): fn(x, y) for a tap on the page (app drawing px), where the kit runs the screen. */
         onTap(fn) { display.onTap = fn; },
+        /**
+         * onShutdown(fn): fn() when the app manager asks the app to stop, before its process ends (iDrive 8: the
+         * entry module's 'shutdown'; it has about a second and a half). For giving something of the car's back -
+         * an audio focus, a connection - not for work that may take long. Never called twice.
+         */
+        onShutdown(fn) {
+            if (typeof fn !== 'function') return;
+            let done = false;
+            const once = () => { if (done) return; done = true; try { fn(); } catch (e) { log.warn('shutdown handler: ' + e); } };
+            if (HOST && typeof HOST.on === 'function') HOST.on('shutdown', once);
+            process.on('SIGTERM', once);
+            process.on('SIGINT', once);
+        },
         /** onTouch(fn): fn(phase, x, y) (1 down, 2 move, 3 up; screen px) for every touch the kit's page gets; true takes it. */
         onTouch(fn) { display.onTouch = fn; },
         /**

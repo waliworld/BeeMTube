@@ -642,15 +642,26 @@ Sinks.prototype.release = async function () {
     try { await withTimeout(this.amRelease(), this.o.releaseMs || 8000, 'amRelease'); } catch (e) { this.o.log('audio: release: ' + errText(e)); }
 };
 Sinks.prototype.cancel = function () { this.cancelled = true; };
+/* Our own clock takes the picture on from where the play is, and the search looks further. The one place the
+ * clock is (re)started after the first play, so the gate (gateFn) is written once, here. paused: start it stopped. */
+Sinks.prototype.resumeClock = function (paused) {
+    if (!this.want) return;
+    this.clock = new ClockSink(this.o, this.h, (ms) => (this.gateFn ? this.gateFn(ms) : true));
+    this.clock.play(this.want.file, this.where(), this.want.info);
+    if (paused) this.clock.stopTicking();
+    this.cancelled = false;
+    this.search();
+};
 /* The sound that played fell away (the daemon saw its player stop in the middle, or it would not go on). It is
- * let go and, twice over in one video, not tried again for that video. */
-Sinks.prototype.fellAway = function () {
+ * let go and, twice over in one video, not tried again for that video; the picture plays on (resumeClock). */
+Sinks.prototype.fellAway = function (paused) {
     const s = this.sound;
     if (!s) return null;
     this.stopWatch();
     this.dropped[s.key] = (this.dropped[s.key] || 0) + 1;
     this.sound = null;
     s.release().catch((e) => this.o.log('audio: release: ' + errText(e)));
+    this.resumeClock(paused);
     return s;
 };
 /* The driver hears nothing through what plays: it is left out from now on, and the search goes on under the
@@ -665,12 +676,7 @@ Sinks.prototype.nosound = function () {
     this.sound = null;
     s.release().catch((e) => this.o.log('audio: release: ' + errText(e)));
     // the picture goes on: our own clock takes over where the sound was, and the search looks further
-    if (this.want) {
-        this.clock = new ClockSink(this.o, this.h, (ms) => (this.gateFn ? this.gateFn(ms) : true));
-        this.clock.play(this.want.file, this.where(), this.want.info);
-        this.cancelled = false;
-        this.search();
-    }
+    this.resumeClock(false);
     return s.name;
 };
 Sinks.prototype.reset = function () {
