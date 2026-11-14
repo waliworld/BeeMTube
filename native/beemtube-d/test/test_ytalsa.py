@@ -71,7 +71,9 @@ class Run:
             except ValueError:
                 self.evs.append({'ev': 'garbage', 'line': line})
 
-    def wait(self, pred, secs=6):
+    def wait(self, pred, secs=15):   # generous: the time events follow the player's wall clock, which lags under
+                                     # heavy load (a release build runs this amid compiling); every use is "is not
+                                     # None", so a longer wait only tolerates a late event, it never passes falsely
         end = time.time() + secs
         while time.time() < end:
             for e in list(self.evs):
