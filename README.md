@@ -9,6 +9,19 @@ iDrive 8, from the same code, with the part that iDrive 8 broke built again from
 > your own risk. You are responsible for following YouTube's Terms of Service and the laws of your country, and for
 > using it safely: by default the picture shows only while the car is parked.
 
+|  |  |
+|---|---|
+| ![Home / sign in](docs/media/home.png) | ![Search](docs/media/search.png) |
+| Home: sign in with a code on your phone; the rail is Search, Home, Subscriptions, Watch later, Settings | Search with the on-screen keyboard (typing only while parked; recent searches as chips) |
+| ![Results](docs/media/results.png) | ![The player](docs/media/player.png) |
+| Results, five tiles a row on the wide iDrive 8 screen | The player; **No sound?** leaves a silent way out and the search looks on, the video never stops |
+| ![While driving](docs/media/driving.png) | ![Settings](docs/media/settings.png) |
+| While driving: the sound plays on, the picture becomes a podcast view, "Up next" queued | Settings: the account, Diagnostics, and the settings sheet |
+
+> Rendered on a computer at the iDrive 8 screen size (2880 × 960) with demo data, through the app's own HMI stub
+> (`kit/tools/test_beemtube8.js SHOTS=<dir>`), not photographed in a car. On the car the GPU draws the real video
+> where the player shows a placeholder here.
+
 ## What this rebuild changes
 
 On iDrive 8 the earlier app drew, searched and showed thumbnails, but **a video never played**: the service first had
