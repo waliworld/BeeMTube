@@ -1,5 +1,15 @@
 # Changelog
 
+## BeeMTube 0.6.1: republish so the Store offers it again (no functional change)
+
+The mgu-browser import rebuilt the catalog release and re-uploaded wali_beemtube8@0.6.0
+and beemtube-d@0.6.0 with new bytes (the build stamps SOURCE_DATE_EPOCH from the last
+commit), so a car already on 0.6.0 saw the same version it had installed - the Store
+showed it as installed rather than offering it, and the re-clobbered sha256 no longer
+matched the installed package. Bumping to 0.6.1 forces a clean re-offer with fresh
+packages. No code change to the app or service; the accidental mgu-repo.json at the repo
+root (which could make the Store read the source as a repo tree) was also removed.
+
 ## BeeMTube 0.6.0: the picture no longer waits for the sound, and the app does the asking
 
 BeeMTube is RideTube's code for iDrive 8, with the part that iDrive 8 broke built again from the other end. On a car

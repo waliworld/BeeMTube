@@ -1,7 +1,7 @@
 {
   "id": "beemtube-d",
   "kind": "tool",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "license": "GPL-3.0-or-later",
   "title": "BeeMTube service",
   "description": "The car side of BeeMTube, an unofficial client for YouTube: yt-dlp (from its official release, run in mgu-python) fetches as the daemon's own internet uid; search, feeds and thumbnails on the car (jap-node22); the video is decoded by ytdec into the mgu-render video layer and plays on this service's own clock, so the picture never waits for the sound; on iDrive 8 the sound is asked for by the BeeMTube app (the registered OAP app the car's media services answer) or played by this service itself (ytaud, ytalsa.py), and on iDrive 7 through the BMW MediaPlayer as ever; TV device sign-in; controlled by the BeeMTube app over /run/beemtube-d/ctl.sock. iDrive 7 and iDrive 8",

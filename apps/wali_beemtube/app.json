@@ -8,7 +8,7 @@
     "maxDiskUsage": 268435456,
     "description": "Video in the car, for iDrive 8: an unofficial client for YouTube. Your Home, Subscriptions and Watch later (signed in on the car), search with an on-screen keyboard, channels and chapters. The picture starts as soon as the video is ready and never waits for the sound; the sound is asked of the car by this app itself (the car answers a registered app, not a daemon) and played where this car lets it. Touch only. Needs the beemtube-d tool and the GPU renderer (mgu-render)."
   },
-  "version": "0.6.0",
+  "version": "0.6.1",
   "license": "GPL-3.0-or-later",
   "vendor": "custom",
   "loggingId": "BMTU",
